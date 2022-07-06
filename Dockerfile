@@ -1,0 +1,36 @@
+FROM python:3.9-alpine3.13
+LABEL maintainer="qwerwon@gmail.com"
+
+ENV PYTHONUNBUFFERED 1
+
+COPY ./requirements.txt /tmp/requirements.txt
+COPY ./requirements.txt.dev.txt /tmp/requirements.dev.txt
+COPY ./app /app
+WORKDIR /app
+EXPOSE 8000
+
+# set default to None-dev
+ARG DEV=false
+RUN pip install --upgrade pip
+RUN pip install -r /tmp/requirements.txt
+RUN if [ $DEV = "true" ]; \
+        then pip install -r /tmp/requirements.dev.txt ; \
+    fi
+RUN rm -rf /tmp
+RUN adduser --disabled-password \
+        --no-create-home \
+        django-user
+
+#RUN pip install --upgrade pip && \
+#    pip install -r /tmp/requirements.txt && \
+#    if [ $DEV = "true" ]; \
+#      then pip install -r /tmp/requirements.dev.txt ; \
+#    fi && \
+#    rm -rf /tmp && \
+#    adduser \
+#        --disabled-password \
+#        --no-create-home \
+#        django-user \
+ENV PATH="/py/bin:$PATH"
+
+USER django-user
